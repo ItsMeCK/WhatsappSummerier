@@ -1,0 +1,23 @@
+# docker-compose.yml
+# Use this file to easily start a MongoDB instance locally for LangGraph state management.
+# Run `docker-compose up -d` in the same directory as this file.
+
+services:
+  mongo:
+    image: mongo:latest # Use the official MongoDB image
+    container_name: mongo_langgraph_qa # A specific name for the container
+    ports:
+      - "27017:27017" # Map the default MongoDB port to your host machine
+    volumes:
+      - mongo-data:/data/db # Persist MongoDB data using a named Docker volume
+    environment:
+      # Optional: Set root username/password if needed for security.
+      # If you set these, update the MONGO_URI in the Python code accordingly.
+      # MONGO_INITDB_ROOT_USERNAME: root
+      # MONGO_INITDB_ROOT_PASSWORD: yoursecurepassword
+      MONGO_INITDB_DATABASE: langgraph_db # Automatically creates this database on first run
+    restart: unless-stopped # Ensure the container restarts if stopped unexpectedly
+
+volumes:
+  mongo-data: # Define the named volume for data persistence
+    driver: local
