@@ -12,37 +12,6 @@ The application uses:
 - **LangSmith** (optional) for tracing and observability.
 - **Twilio** (optional) for WhatsApp integration.
 
-**Workflow Diagram (Mermaid):**
-
-```mermaid
-graph TD
-    A[Start] --> B(generate_questions);
-    B --> C{Parallel Fork};
-    C --> D[fetch_openai_answers];
-    C --> E[fetch_brave_search_answers];
-    E --> F[fetch_tavily_answers];
-    D --> G{Join};
-    F --> G;
-    G --> H(combine_and_summarize);
-    H --> I[End];
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style I fill:#f9f,stroke:#333,stroke-width:2px
-    style C fill:#ccf,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
-    style G fill:#ccf,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
-
-
-Edges (Flow Explained):
-Entry: The graph starts at generate_questions.
-Parallel Fork: After generate_questions, the workflow splits into two main branches that run concurrently:
-Branch 1: Executes fetch_openai_answers.
-Branch 2: Executes fetch_brave_search_answers.
-Sequential Search: Within Branch 2, after fetch_brave_search_answers completes, fetch_tavily_answers is executed.
-Join: The graph waits until both Branch 1 (fetch_openai_answers) and the end of Branch 2 (fetch_tavily_answers) have finished.
-Summarize: Once both branches are complete, the combine_and_summarize node runs.
-End: After combine_and_summarize, the graph reaches its END state.
-
-
 ## Features
 
 - Extracts questions directly from the input text.
@@ -221,6 +190,35 @@ The graph maintains the following state information during execution:
 4.  **`fetch_tavily_answers`:** Gets Tavily Search snippets for `questions`. Updates `tavily_answers`. (Runs *after* Brave Search)
 5.  **`combine_and_summarize`:** Combines inputs (OpenAI, Brave, Tavily) and generates a summary using OpenAI. Updates `final_summary`.
 
+**Workflow Diagram (Mermaid):**
+
+```mermaid
+graph TD
+    A[Start] --> B(generate_questions);
+    B --> C{Parallel Fork};
+    C --> D[fetch_openai_answers];
+    C --> E[fetch_brave_search_answers];
+    E --> F[fetch_tavily_answers];
+    D --> G{Join};
+    F --> G;
+    G --> H(combine_and_summarize);
+    H --> I[End];
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style I fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#ccf,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
+    style G fill:#ccf,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
+
+
+Edges (Flow Explained):
+Entry: The graph starts at generate_questions.
+Parallel Fork: After generate_questions, the workflow splits into two main branches that run concurrently:
+Branch 1: Executes fetch_openai_answers.
+Branch 2: Executes fetch_brave_search_answers.
+Sequential Search: Within Branch 2, after fetch_brave_search_answers completes, fetch_tavily_answers is executed.
+Join: The graph waits until both Branch 1 (fetch_openai_answers) and the end of Branch 2 (fetch_tavily_answers) have finished.
+Summarize: Once both branches are complete, the combine_and_summarize node runs.
+End: After combine_and_summarize, the graph reaches its END state.
 Checkpointer Configuration (MongoDB)
 The application attempts to use langgraph.checkpoint.mongodb.MongoDBSaver for persistence.
 Requires the pymongo library.
